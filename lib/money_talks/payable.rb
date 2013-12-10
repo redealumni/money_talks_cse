@@ -12,14 +12,10 @@ module MoneyTalks
     end
     
     def send_payment(callbacks={}, &data)
-      #begin
-        raise NotImplementedError, "Select a provider before calling this method" if @adapter.nil?
-        provider_specific = @adapter.payment.instance_eval(&data)
-        response = @adapter.send_payment(provider_specific)
-        callbacks[:on_success].call response
-      #rescue Exception => e
-      #  callbacks[:on_error].call response
-      #end
+      raise NotImplementedError, "Select a provider before calling this method" if @adapter.nil?
+      provider_specific = @adapter.payment.instance_eval(&data)
+      response = @adapter.send_payment(provider_specific)
+      callbacks[:on_success].call response
     end
 
     def cancel_payment(callbacks={}, &data)      

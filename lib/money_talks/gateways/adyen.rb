@@ -6,33 +6,22 @@ module MoneyTalks
         MoneyTalks::Payment::Adyen.new
       end
 
-      # return status code
+      # return 
       def send_payment(payment_info)
-        "200"
-        #raise ExampleError
-        #begin
-          #response = @gateway.send_payment(payment_info)
-          #callbacks[:on_success].call response
-        #rescue Exception => e
-          #callbacks[:on_error].call response
-        #end
+        raise NotImplementedError
       end
 
-      def refund_payment(callbacks={})
-        begin
-          @gateway.refund_payment(refund_info)
-        rescue Exception => e
-          
-        end
+      def refund_payment(refund_info)
+        raise NotImplementedError
       end
 
-      def cancel_payment(callbacks={})
-        @gateway.cancel_payment
+      def cancel_payment(cancel_info)
+        raise NotImplementedError
       end
 
       # informa o gateway que recebeu o post back
       def post_back_acknowledgment(token)
-        @gateway.post_back_acknowledgment(token)
+        raise NotImplementedError
       end
 
     end

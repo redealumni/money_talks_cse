@@ -21,7 +21,6 @@ module MoneyTalks
       @gateway.cancel_payment(cancel_info)
     end
 
-    # informa o gateway que recebeu o post back
     def post_back_acknowledgment(token)
       @gateway.post_back_acknowledgment(token)
     end
