@@ -24,13 +24,12 @@ Or install it yourself as:
 class Payment < ActiveRecord::Base
 
   include Payable
-  
   gateway_provider :adyen
 
 
   # implement your callbacks
 
-  def on_send_payment_success
+  def on_pay_success
     Proc.new do |resp|
       self.status = "gateway_ack"
       self.status_reason = resp.reason
@@ -38,33 +37,41 @@ class Payment < ActiveRecord::Base
     end
   end
 
-  def on_send_payment_error
+  def on_pay_error
     Proc.new do |resp|
       self.status = "Error"
       self.status_reason = resp.reason
     end
   end
 
+  def on_cancel_success
+  end
 
+  def on_cancel_error
+  end
+
+  def on_refund_success
+  end
+
+  def on_refund_error
+  end
 
 end
+```
 
-p = Payment.new
+```ruby
+
+
+payment = Payment.new
  
-p.send_payment(on_success: p.on_send_payment_success, on_error: p.on_send_payment_error) do 
-  merchant_account = "MyShop"
-  amount = 100
-  reference = MoneyTalks::TransactionNumberGenerator.generate
-end
+payment.send_payment(on_success: p.on_send_payment_success, 
+  on_error: p.on_send_payment_error) do |data|
 
-p.cancel_payment do
-
-end
-
-p.refund_payment do
+  data.merchant_account = "MyShop"
+  data.amount = 100
+  data.reference = MoneyTalks::TransactionNumberGenerator.generate
 
 end
-
 
 ```
 

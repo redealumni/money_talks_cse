@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'money_talks'
 
-include PayGem::Payable
+include MoneyTalks::Payable
 
 gateway_provider 'adyen'
 
@@ -15,10 +15,10 @@ fake_payment_data = {
 }
    
 
-send_payment(on_success: on_success, on_error: on_error) do
+pay(on_success: on_success, on_error: on_error) do |payment_data|
   
-  merchant_account = fake_payment_data[:merchant_account]
-  amount = fake_payment_data[:amount]
-  reference = fake_payment_data[:reference]
+  payment_data.merchant_account = fake_payment_data[:merchant_account]
+  payment_data.amount = fake_payment_data[:amount]
+  payment_data.reference = fake_payment_data[:reference]
 
 end

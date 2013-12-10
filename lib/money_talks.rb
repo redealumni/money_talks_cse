@@ -14,6 +14,7 @@ module MoneyTalks
   autoload :GatewayAdapter, 'money_talks/gateway_adapter.rb'
 
   module Payment
+    autoload :Base, 'money_talks/payments/base.rb'
     autoload :Adyen, 'money_talks/payments/adyen.rb'
     autoload :PagSeguro, 'money_talks/payments/pag_seguro.rb'
   end

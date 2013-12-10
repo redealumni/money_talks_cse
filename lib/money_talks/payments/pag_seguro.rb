@@ -1,6 +1,6 @@
 module MoneyTalks
   module Payment
-    class PagSeguro
+    class PagSeguro < Base
 
     end
   end
