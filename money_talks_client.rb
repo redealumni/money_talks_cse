@@ -1,9 +1,18 @@
 require 'rubygems'
 require 'money_talks'
 
+MoneyTalks.configure do |config|
+  config.payment_service_provider = "adyen"
+  config.endpoint = "http://www.example.com"
+  config.user = "felipe"
+  config.pass = "password"
+end
+
+
+
 include MoneyTalks::Payable
 
-gateway_provider 'adyen'
+#gateway_provider 'adyen'
 
 on_error = Proc.new {|response| puts response }
 on_success = Proc.new {|response| puts response }

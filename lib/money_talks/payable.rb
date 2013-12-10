@@ -1,21 +1,22 @@
 module MoneyTalks
   module Payable
 
-    def gateway_provider(provider)
-      begin
-        provider = Object.const_get("MoneyTalks::Gateway::#{provider.capitalize!}")
-        @adapter = MoneyTalks::GatewayAdapter.instance
-        @adapter.gateway = provider.new
-      rescue NameError => e
-        raise NameError, "Provider #{provider} not available: #{e}"  
-      end
-    end
+    #def gateway_provider(provider)
+      #begin
+        #provider = Object.const_get("MoneyTalks::Gateway::#{provider.capitalize!}")
+        #@adapter = MoneyTalks::GatewayAdapter.instance
+        #@adapter.gateway = provider.new
+      #rescue NameError => e
+        #raise NameError, "Provider #{provider} not available: #{e}"  
+      #end
+    #end
     
     def pay(callbacks={}, &data)
-      raise NotImplementedError, "Select a provider before calling this method" if @adapter.nil?
-      provider_specific = @adapter.payment.evaluate &data
+      puts MoneyTalks::gateway_adapter.inspect
+      raise NotImplementedError, "Select a provider before calling this method" if MoneyTalks::gateway_adapter.psp.nil?
+      provider_specific = MoneyTalks::gateway_adapter.payment.evaluate &data
       begin
-        response = @adapter.send_payment(provider_specific)
+        response = MoneyTalks::gateway_adapter.send_payment(provider_specific)
       rescue Exception => e
         callbacks[:on_error].call("#{e.message} - #{response}")
       end

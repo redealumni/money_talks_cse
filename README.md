@@ -1,7 +1,10 @@
 # MoneyTalks
 
-A simple interface for payment gateways that seamlessly integrate with
-ActiveRecord. Hook up your provider and start __paying__!
+A simple common interface for payment gateways. Don't let a specific vendor hold
+you hostage. Payment gateways integration don't have to be
+painful. MoneyTalks lets you attach vendor-specific code to your app 
+and integrate seamlessly with ActiveRecord through a clean and simple interface.
+If your provider is still not supported feel free to contribute
 
 ## Installation
 
@@ -18,6 +21,26 @@ Or install it yourself as:
     $ gem install money_talks
 
 ## Usage
+
+First step you should enpower you ActiveRecord model by including ``include
+Payable``. Now this model becomes payable and you can select your gateway
+provider. Then implement your callbacks!
+
+## Rails
+
+If you are using rails, first create this file insider your initializers folder money_talks.rb
+
+```ruby
+
+MoneyTalks.configure do |config|
+  config.payment_service_provider = "gateway"
+  config.endpoint = "http://www.gateway.com"
+  config.user = "my_user"
+  config.pass = "my_password"
+end
+
+```
+
 
 ``` ruby
 
@@ -75,9 +98,10 @@ end
 
 ```
 
-### Supported Providers
+## Supported PSPs
 
-Adyen, PagSeguro
+  - Adyen
+  - PagSeguro
 
 ## Contributing
 

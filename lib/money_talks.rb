@@ -24,4 +24,18 @@ module MoneyTalks
     autoload :PagSeguro, 'money_talks/gateways/pag_seguro.rb'
   end
 
+  class << self
+
+    attr_accessor :gateway_adapter
+
+    def gateway_adapter
+      @gateway_adapter ||= MoneyTalks::GatewayAdapter.instance
+    end
+
+    def configure
+      yield(gateway_adapter)
+    end
+
+  end
+
 end
