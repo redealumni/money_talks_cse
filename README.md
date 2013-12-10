@@ -64,7 +64,7 @@ end
 
 payment = Payment.new
  
-payment.send_payment(on_success: p.on_send_payment_success, 
+payment.pay(on_success: p.on_send_payment_success, 
   on_error: p.on_send_payment_error) do |data|
 
   data.merchant_account = "MyShop"
