@@ -1,0 +1,12 @@
+.bundle
+
+# Rspec
+.rspec
+
+# RVM specific files
+.rvmrc
+.ruby-gemset
+.ruby-version
+
+tmp/
+.tddium*
