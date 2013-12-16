@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
   gem.version       = MoneyTalks::VERSION
   gem.authors       = ['Felipe JAPM']
   gem.email         = ['felipe.japm@gmail.com']
-  gem.description   = %q{Handle many payment gateways with a simple interface. MoneyTalks enpowers you!}
+  gem.description   = %q{Handle payment gateways with a simple interface}
   gem.summary       = %q{Hook up your provider and start paying}
   gem.homepage      = ""
 
@@ -21,6 +21,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
 
   gem.add_dependency 'savon'
+  gem.add_dependency 'activesupport'
 
   gem.add_development_dependency 'pry'
   gem.add_development_dependency 'localtunnel'

@@ -47,8 +47,6 @@ end
 class Payment < ActiveRecord::Base
 
   include Payable
-  gateway_provider :adyen
-
 
   # implement your callbacks
 

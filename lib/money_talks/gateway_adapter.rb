@@ -3,15 +3,19 @@ module MoneyTalks
 
     include Singleton
 
-    attr_accessor :user, :pass, :endpoint, :psp
+    attr_accessor :user, :password, :webservice_endpoint, :psp
+    
     alias_method :payment_service_provider, :psp
 
     def payment_service_provider=(provider)
+      @name = provider.to_s
+
       begin
-        @psp = Object.const_get("MoneyTalks::Gateway::#{provider.capitalize!}").new
-      rescue NameError => e
-        raise NameError, "Provider #{provider} not available: #{e}"
+        @psp = Object.const_get("MoneyTalks::Gateway::#{@name.camelize}").new
+      rescue NameError
+        raise PSPNotSupportedError, "Provider #{provider.camelize} not available. Implement it first"
       end
+
     end
 
     def payment
@@ -32,6 +36,10 @@ module MoneyTalks
 
     def post_back_acknowledgment(token)
       @psp.post_back_acknowledgment(token)
+    end
+
+    def to_s
+      @name
     end
 
   end

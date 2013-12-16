@@ -4,6 +4,7 @@ $LOAD_PATH.unshift(money_talks_path) unless $LOAD_PATH.include?(money_talks_path
 
 require 'savon'
 require 'singleton'
+require 'active_support/core_ext'
 
 module MoneyTalks
   
@@ -12,6 +13,10 @@ module MoneyTalks
   autoload :TransactionNumberGenerator, 'money_talks/transaction_number_generator.rb'
   autoload :Payable, 'money_talks/payable.rb'
   autoload :GatewayAdapter, 'money_talks/gateway_adapter.rb'
+  
+  # Exceptions
+  autoload :PSPNotSupportedError, 'money_talks/exceptions.rb'
+  autoload :FieldNotSupportedError, 'money_talks/exceptions.rb'
 
   module Payment
     autoload :Base, 'money_talks/payments/base.rb'
@@ -26,14 +31,19 @@ module MoneyTalks
 
   class << self
 
-    attr_accessor :gateway_adapter
+    #attr_accessor :gateway_adapter
 
+    # FIXME ||=
     def gateway_adapter
-      @gateway_adapter ||= MoneyTalks::GatewayAdapter.instance
+      @gateway_adapter = MoneyTalks::GatewayAdapter.instance
     end
 
     def configure
-      yield(gateway_adapter)
+      begin
+        yield(gateway_adapter)
+      rescue NoMethodError => e
+        raise FieldNotSupportedError, "The field #{e.name} is not supported by the provider #{gateway_adapter.to_s}"
+      end
     end
 
   end
