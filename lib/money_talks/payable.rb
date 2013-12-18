@@ -1,11 +1,12 @@
 module MoneyTalks
   module Payable
     
-    def pay(callbacks={}, &data)
+    def authorize(callbacks={}, &data)
       raise NotImplementedError, "Select a provider before calling this method" if MoneyTalks::gateway_adapter.psp.nil?
-      provider_specific = MoneyTalks::gateway_adapter.payment.evaluate &data
+      payment_data = MoneyTalks::gateway_adapter.payment.evaluate &data
+      puts payment_data.inspect
       begin
-        response = MoneyTalks::gateway_adapter.send_payment(provider_specific)
+        response = MoneyTalks::gateway_adapter.send_payment(payment_data)
       rescue Exception => e
         callbacks[:on_error].call("#{e.message} - #{response}")
       end

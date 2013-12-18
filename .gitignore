@@ -1,5 +1,5 @@
 .bundle
-.gem
+*.gem
 
 # Rspec
 .rspec

@@ -9,24 +9,27 @@ require 'active_support/core_ext'
 module MoneyTalks
   
   autoload :VERSION, 'money_talks/version.rb'
-  autoload :PaymentGatewayAdapter, 'money_talks/payment_gateway_adapter.rb'
-  autoload :TransactionNumberGenerator, 'money_talks/transaction_number_generator.rb'
+  autoload :TransactionNumberGenerator, 'money_talks/helpers/transaction_number_generator.rb'
   autoload :Payable, 'money_talks/payable.rb'
+  autoload :Serializable, 'money_talks/serializable.rb'
   autoload :GatewayAdapter, 'money_talks/gateway_adapter.rb'
+  autoload :AbstractGateway, 'money_talks/abstract_gateway.rb'
+  autoload :PaymentBase, 'money_talks/payment_base.rb'
   
   # Exceptions
-  autoload :PSPNotSupportedError, 'money_talks/exceptions.rb'
-  autoload :FieldNotSupportedError, 'money_talks/exceptions.rb'
+  autoload :PSPNotSupportedError, 'money_talks/errors.rb'
+  autoload :FieldNotSupportedError, 'money_talks/errors.rb'
 
-  module Payment
-    autoload :Base, 'money_talks/payments/base.rb'
-    autoload :Adyen, 'money_talks/payments/adyen.rb'
-    autoload :PagSeguro, 'money_talks/payments/pag_seguro.rb'
-  end
+  module Adyen
 
-  module Gateway
-    autoload :Adyen, 'money_talks/gateways/adyen.rb' 
-    autoload :PagSeguro, 'money_talks/gateways/pag_seguro.rb'
+    autoload :Adapter, 'money_talks/gateways/adyen/adapter.rb'
+
+    module Payments
+      autoload :Base, 'money_talks/gateways/adyen/payments/base.rb'
+      autoload :CreditCard, 'money_talks/gateways/adyen/payments/credit_card.rb'
+      autoload :Boleto, 'money_talks/gateways/adyen/payments/boleto.rb'
+    end
+
   end
 
   class << self

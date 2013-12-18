@@ -15,7 +15,7 @@ describe MoneyTalks do
 
     context 'with a valid configuration' do
       
-      let(:valid) do
+      let(:valid_adapter) do
 
         subject.configure do |config|
           config.payment_service_provider = :adyen

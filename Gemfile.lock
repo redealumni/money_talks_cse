@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    money_talks (0.0.1)
+    money_talks (0.0.2)
       activesupport
       savon
 

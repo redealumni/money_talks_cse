@@ -3,31 +3,35 @@ require 'money_talks'
 
 MoneyTalks.configure do |config|
   config.payment_service_provider = "adyen"
-  config.endpoint = "http://www.example.com"
+  config.webservice_endpoint = "http://www.example.com"
   config.user = "felipe"
-  config.pass = "password"
+  config.password = "password"
 end
-
 
 
 include MoneyTalks::Payable
 
-#gateway_provider 'adyen'
-
 on_error = Proc.new {|response| puts response }
 on_success = Proc.new {|response| puts response }
 
-fake_payment_data = {
-   merchant_account: "QueroBolsa",
-   amount: 20,
-   reference: MoneyTalks::TransactionNumberGenerator.generate("querobolsa")
-}
+authorize(on_success: on_success, on_error: on_error) do |payment|
    
-
-pay(on_success: on_success, on_error: on_error) do |payment_data|
+  payment.merchant_account  = "querobolsa"
+  payment.reference = "287t34872gkasgra"
   
-  payment_data.merchant_account = fake_payment_data[:merchant_account]
-  payment_data.amount = fake_payment_data[:amount]
-  payment_data.reference = fake_payment_data[:reference]
+  payment.amount do |amount_data|
+    amount_data.currency = "BRL"
+    amount_data.value = 20
+  end
+
+  payment.fraud_offset = 10
+
+  payment.payment_method :credit_card do |cc|
+    cc.expiry_month = "12"
+    cc.expiry_year = "2014"
+    cc.holder_name = "John Doe"
+    cc.number = "1111-2222-3333-4444"
+    cc.cvc = "492"
+  end
 
 end
