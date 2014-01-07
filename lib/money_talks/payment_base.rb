@@ -6,7 +6,5 @@ module MoneyTalks
       self
     end
 
-
-
   end
 end

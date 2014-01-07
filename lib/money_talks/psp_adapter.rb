@@ -1,33 +1,28 @@
 module MoneyTalks
-  class GatewayAdapter
+  class PSPAdapter
 
     include Singleton
+    
+    attr_reader :psp
 
-    attr_accessor :user, :password, :webservice_endpoint, :psp
+    delegate :user=, :password=, :wsdl=, :payment, to: :psp
 
-    alias_method :payment_service_provider, :psp
-
-    delegate :user=, :password=, :webservice_endpoint=, to: :psp
-
-    def payment_service_provider=(provider)
+    def psp=(provider)
       @name = provider.to_s
 
       begin
         @psp = Object.const_get("MoneyTalks::#{@name.camelize}::Adapter").new
       rescue NameError => e
-        puts e
+        # puts e
         
         #raise PSPNotSupportedError, "Provider #{provider.camelize} not available. Implement it first"
       end
 
     end
 
-    def payment
-      @psp.build_payment
-    end
 
-    def send_payment(payment_info)
-      @psp.send_payment(payment_info)
+    def authorize_payment(payment_info)
+      @psp.authorize_payment(payment_info)
     end
 
     def refund_payment(refund_info)

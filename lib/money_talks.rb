@@ -10,10 +10,10 @@ module MoneyTalks
   
   autoload :VERSION, 'money_talks/version.rb'
   autoload :TransactionNumberGenerator, 'money_talks/helpers/transaction_number_generator.rb'
+  autoload :SavonSerializationSupport, 'money_talks/helpers/savon_serialization_support.rb'
   autoload :Payable, 'money_talks/payable.rb'
   autoload :Serializable, 'money_talks/serializable.rb'
-  autoload :GatewayAdapter, 'money_talks/gateway_adapter.rb'
-  autoload :AbstractGateway, 'money_talks/abstract_gateway.rb'
+  autoload :PSPAdapter, 'money_talks/psp_adapter.rb'
   autoload :PaymentBase, 'money_talks/payment_base.rb'
   
   # Exceptions
@@ -34,16 +34,13 @@ module MoneyTalks
 
   class << self
 
-    #attr_accessor :gateway_adapter
-
-    # FIXME ||=
     def gateway_adapter
-      @gateway_adapter = MoneyTalks::GatewayAdapter.instance
+      @gateway_adapter ||= MoneyTalks::PSPAdapter.instance
     end
 
     def configure
       begin
-        yield(gateway_adapter)
+        yield gateway_adapter
       rescue NoMethodError => e
         raise FieldNotSupportedError, "The field #{e.name} is not supported by the provider #{gateway_adapter.to_s}"
       end

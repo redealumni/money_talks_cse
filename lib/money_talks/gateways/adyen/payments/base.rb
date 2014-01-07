@@ -3,17 +3,15 @@ module MoneyTalks
     module Payments
       class Base < PaymentBase
         
-        include Serializable
         extend Savon::Model
+        include MoneyTalks::SavonSerializationSupport
 
-        class Amount < Struct.new("Amount", :currency, :value) 
-          include Serializable
+        class Amount < Struct.new("Amount", :currency, :value)
+          alias_method :to_symbolized_hash, :to_h
         end
 
-        
-        attr_accessor :merchant_account, :amount, :reference, :reference, :shopper_id, 
-                      :shopper_email, :shopper_reference, :fraud_offset, 
-                      :select_brand
+        attr_accessor :merchant_account, :reference, :shopper_ip, :shopper_email,
+          :shopper_reference, :fraud_offset, :select_brand
 
         def amount(&block)
           @amount ||= Amount.new
@@ -34,7 +32,14 @@ module MoneyTalks
           end
         end
 
-        def serialize
+        # FIXME hack temporário
+        def serialize_as_symbolized_hash
+          serialized_model = {}
+          serialized_model.store(:payment_request,'')
+          serialized_model[:payment_request] = self.to_symbolized_hash
+          serialized_model[:payment_request][:card] = self.payment_method.to_symbolized_hash
+          serialized_model[:payment_request][:amount] = self.amount.to_symbolized_hash
+          serialized_model
         end
 
       end

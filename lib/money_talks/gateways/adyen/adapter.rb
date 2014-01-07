@@ -1,27 +1,37 @@
 module MoneyTalks
   module Adyen
-    class Adapter < MoneyTalks::AbstractGateway
+    class Adapter
 
+      PAYMENT_WSDL = "https://pal-test.adyen.com/pal/Payment.wsdl"
+
+      attr_accessor :user, :password
       attr_reader :payment
 
       def initialize
-        @client = Savon.client(wsdl: self.webservice_endpoint)
-      end
-
-      def build_payment
         @payment = Payments::Base.new
       end
 
-      # return 
-      def send_payment(payment)
-        @client.call(:authorize) do
-          message payment.serialize
-          convert_request_keys_to :camelcase        
+      def connection_handler
+        @ws_client ||= Savon.client(basic_auth: [user, password]) do 
+          wsdl PAYMENT_WSDL 
+          convert_request_keys_to :lower_camelcase
+        end
+      end
+
+      def authorize_payment(payment_info)
+        begin
+          connection_handler.call(:authorise, message: payment_info.serialize_as_symbolized_hash)
+        rescue Exception => e
+
         end
       end
 
       def refund_payment(refund_info)
-        raise NotImplementedError
+        begin
+          connection_handler.call(:refund)
+        rescue Exception => e
+
+        end
       end
 
       def cancel_payment(cancel_info)
