@@ -8,7 +8,7 @@ require 'money_talks/version'
 Gem::Specification.new do |gem|
   gem.name          = "money_talks"
   gem.version       = MoneyTalks::VERSION
-  gem.authors       = ['Felipe JAPM']
+  gem.authors       = ['Felipe Jordão A.P. Mattosinho']
   gem.email         = ['felipe.japm@gmail.com']
   gem.description   = %q{Handle payment gateways with a simple interface}
   gem.summary       = %q{Hook up your provider and start paying}

@@ -10,7 +10,8 @@ module MoneyTalks
   
   autoload :VERSION, 'money_talks/version.rb'
   autoload :TransactionNumberGenerator, 'money_talks/helpers/transaction_number_generator.rb'
-  autoload :SavonSerializationSupport, 'money_talks/helpers/savon_serialization_support.rb'
+  autoload :SoapObjectBuilder, 'money_talks/helpers/soap_object_builder.rb'
+  autoload :SoapModel, 'money_talks/soap_model.rb'
   autoload :Payable, 'money_talks/payable.rb'
   autoload :Serializable, 'money_talks/serializable.rb'
   autoload :PSPAdapter, 'money_talks/psp_adapter.rb'

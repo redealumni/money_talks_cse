@@ -4,7 +4,6 @@ module MoneyTalks
       class Base < PaymentBase
         
         extend Savon::Model
-        include MoneyTalks::SavonSerializationSupport
 
         class Amount < Struct.new("Amount", :currency, :value)
           alias_method :to_symbolized_hash, :to_h
@@ -22,24 +21,19 @@ module MoneyTalks
           end
         end
 
-        def payment_method(method=nil)
-          # Raise exception if payment method doesnt exist
-          @payment_method ||= Object.const_get("MoneyTalks::Adyen::Payments::#{method.to_s.camelize}").new
-          if block_given?
-            yield @payment_method
-          else
-            @payment_method
-          end
-        end
-
-        # FIXME hack temporário
         def serialize_as_symbolized_hash
-          serialized_model = {}
-          serialized_model.store(:payment_request,'')
-          serialized_model[:payment_request] = self.to_symbolized_hash
-          serialized_model[:payment_request][:card] = self.payment_method.to_symbolized_hash
-          serialized_model[:payment_request][:amount] = self.amount.to_symbolized_hash
-          serialized_model
+          SoapObjectBuilder.new(self) do |builder|
+            builder.node :payment_request do |n|
+              
+              builder.default_nodes :merchant_account, :reference, :shopper_ip, :shopper_email,
+                :shopper_reference, :fraud_offset, :select_brand
+              
+              n.node :amount do |amount|
+                amount.currency = obj
+              end
+
+            end
+          end
         end
 
       end
