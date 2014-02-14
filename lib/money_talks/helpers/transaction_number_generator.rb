@@ -2,17 +2,17 @@ module MoneyTalks
   class TransactionNumberGenerator
     class << self
 
-      def generate(prefix="")
+      
+      
+      def generate(prefix="", timestamp=false)
 
-        code = prefix.downcase
+        code = "#{prefix.downcase}_"
         
-        12.times do 
-          code += rand(65..90).chr
-        end
+        code += SecureRandom.hex(6)
 
-        code += "t"
+        code += "_" + Time.now.strftime("%Y%m%d%H%M%S") if timestamp == true
 
-        code += Time.now.strftime("%Y%m%d%H%M%S")
+        code
 
       end
 

@@ -9,43 +9,77 @@ require 'active_support/core_ext'
 module MoneyTalks
   
   autoload :VERSION, 'money_talks/version.rb'
+  autoload :EnvironmentParser, 'money_talks/environment_parser.rb'
   autoload :TransactionNumberGenerator, 'money_talks/helpers/transaction_number_generator.rb'
-  autoload :SoapObjectBuilder, 'money_talks/helpers/soap_object_builder.rb'
-  autoload :SoapModel, 'money_talks/soap_model.rb'
   autoload :Payable, 'money_talks/payable.rb'
   autoload :Serializable, 'money_talks/serializable.rb'
   autoload :PSPAdapter, 'money_talks/psp_adapter.rb'
-  autoload :PaymentBase, 'money_talks/payment_base.rb'
+  autoload :AbstractPayment, 'money_talks/abstract_payment.rb'
   
-  # Exceptions
   autoload :PSPNotSupportedError, 'money_talks/errors.rb'
   autoload :FieldNotSupportedError, 'money_talks/errors.rb'
 
   module Adyen
 
-    autoload :Adapter, 'money_talks/gateways/adyen/adapter.rb'
-
+    autoload :Adapter, 'money_talks/psps/adyen/adapter.rb'
+    autoload :Authorizable, 'money_talks/psps/adyen/operations/authorizable.rb'
+   
     module Payments
-      autoload :Base, 'money_talks/gateways/adyen/payments/base.rb'
-      autoload :CreditCard, 'money_talks/gateways/adyen/payments/credit_card.rb'
-      autoload :Boleto, 'money_talks/gateways/adyen/payments/boleto.rb'
+      autoload :Base, 'money_talks/psps/adyen/payments/base.rb'
+      autoload :Card, 'money_talks/psps/adyen/payments/card.rb'
     end
 
   end
 
   class << self
 
-    def gateway_adapter
-      @gateway_adapter ||= MoneyTalks::PSPAdapter.instance
-    end
+    ENVIRONMENTS = [:development, :test, :production]
 
-    def configure
-      begin
-        yield gateway_adapter
-      rescue NoMethodError => e
-        raise FieldNotSupportedError, "The field #{e.name} is not supported by the provider #{gateway_adapter.to_s}"
+    ENVIRONMENTS.each do |e|
+      define_method "#{e}?" do
+        env? e
       end
     end
+
+    alias :prod? :production?
+    alias :dev? :development?
+    
+    def psp_adapter
+      @psp_adapter ||= MoneyTalks::PSPAdapter.instance
+    end
+
+    # Sets initial settings for the PSP adapter
+    def configure
+       MoneyTalks.env= MoneyTalks::EnvironmentParser.parse(ARGV)
+      begin
+        yield psp_adapter
+      rescue NoMethodError => e
+        raise FieldNotSupportedError, "Field #{e.name} is not supported by the provider #{psp_adapter.to_s}"
+      end
+    end
+    
+    def env
+      @env
+    end
+ 
+    # Sets the current money_talks environment
+    #
+    # @param [String|Symbol] env the environment symbol
+    def env=(e)
+      @env = case(e.to_sym)
+      when :dev  then :development
+      when :prod then :production
+      else e.to_sym
+      end
+    end
+
+    # Determines if we are in a particular environment
+    #
+    # @return [Boolean] true if current environment matches, false otherwise
+    def env?(e)
+      env == e.to_sym
+    end
+
 
   end
 

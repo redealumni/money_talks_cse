@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <soap:Body>
+      <authorise xmlns="http://payment.services.adyen.com">
+        <paymentRequest>
+          <amount>
+            <ns1:currency xmlns:ns1="http://common.services.adyen.com">BRL</ns1:currency>
+            <ns2:value xmlns:ns2="http://common.services.adyen.com">1000</ns2:value>
+          </amount>
+          <billingAddress>
+            <ns3:city xmlns:ns3="http://common.services.adyen.com">São Paulo</ns3:city>
+            <ns4:country xmlns:ns4="http://common.services.adyen.com">BR</ns4:country>
+            <ns5:houseNumberOrName xmlns:ns5="http://common.services.adyen.com">999</ns5:houseNumberOrName>
+            <ns6:postalCode xmlns:ns6="http://common.services.adyen.com">04787910</ns6:postalCode>
+            <ns7:stateOrPrivince xmlns:ns7="http://common.services.adyen.com">SP</ns7:stateOrPrivince>
+            <ns8:street xmlns:ns8="http://common.services.adyen.com">Roque Petroni Jr</ns8:street>
+          </billingAddress>
+          <deliveryDate xmlns="http://payment.services.adyen.com">2013-10-29T23:00:00.000Z</deliveryDate>
+          <merchantAccount xmlns="http://payment.services.adyen.com">YourMerchant</merchantAccount>
+          <reference xmlns="http://payment.services.adyen.com">Teste Boleto</reference>
+          <selectedBrand xmlns="http://payment.services.adyen.com">boletobancario_santander</selectedBrand>
+          <shopperName xmlns="http://payment.services.adyen.com">
+            <ns9:firstName xmlns:ns9="http://common.services.adyen.com">José</ns9:firstName>
+            <ns10:lastName xmlns:ns10="http://common.services.adyen.com">Silva</ns10:lastName>
+          </shopperName>
+          <shopperStatement>Aceitar o pagamento até 15 dias após o vencimento. Não cobrar juros. Não aceitar o
+            pagamento com cheque.
+          </shopperStatement>
+          <socialSecurityNumber>56861752509</socialSecurityNumber>
+        </paymentRequest>
+      </ns1:authorise>
+    </soap:Body>
+</soap:Envelope>

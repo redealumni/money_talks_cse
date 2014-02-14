@@ -1,0 +1,15 @@
+payment_request:
+  merchant_account: "QuerobolsaCOM"
+  reference: "x76huash89ud"
+  shopper_email: "test@test.com"
+  shopper_ip: "123.123.123.123"
+  shopper_reference: "John Doe"
+  amount: 
+    currency: "EUR"
+    value: 2000
+  card:
+    expiry_month: 12
+    expiry_year: 2014
+    holder_name: "John Doe"
+    number: "1111222233334444"
+    cvc: 492

@@ -2,11 +2,11 @@ require 'spec_helper'
 
 describe MoneyTalks do
 
-  describe '.gateway_adapter' do
+  describe '.psp_adapter' do
 
     it 'returns a singleton instance of gateway adapter' do
-      gateway_adapter = MoneyTalks::GatewayAdapter.instance
-      expect(subject.gateway_adapter).to be_eql(gateway_adapter)
+      psp_adapter = MoneyTalks::PSPAdapter.instance
+      expect(subject.psp_adapter).to be_eql(psp_adapter)
     end
 
   end
@@ -18,22 +18,17 @@ describe MoneyTalks do
       let(:valid_adapter) do
 
         subject.configure do |config|
-          config.payment_service_provider = :adyen
-          config.webservice_endpoint = "http://fake.adyen.com"
+          config.psp = :adyen
           config.user = "user"
           config.password = "password"
         end
 
-        subject.gateway_adapter
+        subject.psp_adapter
 
       end
 
       it 'sets the payment service provider' do
-        expect(valid_adapter.payment_service_provider).to be_an_instance_of MoneyTalks::Gateway::Adyen
-      end
-
-      it 'sets the web service endpoint' do
-        expect(valid_adapter.webservice_endpoint).to be_eql("http://fake.adyen.com")
+        expect(valid_adapter.psp).to be_an_instance_of MoneyTalks::Adyen::Adapter
       end
 
       it 'sets the user' do
@@ -53,7 +48,7 @@ describe MoneyTalks do
         it "raises a PSPNotSupportedError" do
           expect {
             subject.configure do |config|
-              config.payment_service_provider = "provider_not_supported"
+              config.psp = "provider_not_supported"
             end
           }.to raise_error MoneyTalks::PSPNotSupportedError
         end
@@ -64,7 +59,7 @@ describe MoneyTalks do
         it "raises a FieldNotSupportedError" do
           expect{
             subject.configure do |config|
-              config.payment_service_provider = :adyen
+              config.psp = :adyen
               config.not_supported_field = "some_configuration"
             end
           }.to raise_error MoneyTalks::FieldNotSupportedError

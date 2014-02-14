@@ -1,0 +1,46 @@
+#! /usr/bin/env ruby
+#MoneyTalks.configure do |config|
+  #config.psp = :adyen
+  #config.user= "ws@Company.Querobolsa"
+  #config.password= "mFdPkXs#N8ng*c/5g/{r8}H9i"
+#end
+
+FIXTURES_PATH = File.join(File.dirname(__FILE__), "fixtures")
+fixtures = []
+Dir.glob("#{FIXTURES_PATH}/*").each { |f| fixtures << eval(File.open(f).read) }
+
+require 'optparse'
+require 'bundler/setup'
+require 'rubygems'
+require 'money_talks'
+require 'pry'
+require 'awesome_print'
+
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: example.rb [options]"
+  opts.on("-p", "--psp PSP", "Sets the payment service provider") do |psp|
+    options[:psp] = psp
+  end
+  opts.on("-P", "--password PASSWORD", "Sets the password") do |pass|
+    options[:password] = pass
+  end
+  opts.on("-U", "--user USER", "Sets the user") do |user|
+    options[:user] = user
+  end
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end.parse!
+
+MoneyTalks.configure do |config|
+  config.psp = options[:psp]
+  config.user= options[:user]
+  config.password= options[:password]
+end
+
+include MoneyTalks::Payable
+AwesomePrint.pry!
+binding.pry

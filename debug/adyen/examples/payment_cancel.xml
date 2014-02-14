@@ -1,0 +1,12 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:pay="http://payment.services.adyen.com" xmlns:com="http://common.services.adyen.com">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <pay:cancel>
+         <pay:modificationRequest>
+            <pay:authorisationCode>6634</pay:authorisationCode>
+            <pay:merchantAccount>QuerobolsaCOM</pay:merchantAccount>
+            <pay:originalReference>8813916082971100</pay:originalReference>
+         </pay:modificationRequest>
+      </pay:cancel>
+   </soapenv:Body>
+</soapenv:Envelope>
