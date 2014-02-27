@@ -10,20 +10,25 @@ module MoneyTalks
   
   autoload :VERSION, 'money_talks/version.rb'
   autoload :EnvironmentParser, 'money_talks/environment_parser.rb'
-  autoload :TransactionNumberGenerator, 'money_talks/helpers/transaction_number_generator.rb'
+  autoload :Client, 'money_talks/client.rb'
+
   autoload :Payable, 'money_talks/payable.rb'
   autoload :Serializable, 'money_talks/serializable.rb'
-  autoload :PSPAdapter, 'money_talks/psp_adapter.rb'
-  autoload :AbstractPayment, 'money_talks/abstract_payment.rb'
+  autoload :Adapter, 'money_talks/adapter.rb'
+  autoload :PaymentBuilder, 'money_talks/payment_builder.rb'
   
   autoload :PSPNotSupportedError, 'money_talks/errors.rb'
   autoload :FieldNotSupportedError, 'money_talks/errors.rb'
 
+  module Helpers
+    autoload :TransactionNumberGenerator, 'money_talks/helpers/transaction_number_generator.rb'
+  end
+  
   module Adyen
 
     autoload :Adapter, 'money_talks/psps/adyen/adapter.rb'
     autoload :Authorizable, 'money_talks/psps/adyen/operations/authorizable.rb'
-   
+    
     module Payments
       autoload :Base, 'money_talks/psps/adyen/payments/base.rb'
       autoload :Card, 'money_talks/psps/adyen/payments/card.rb'
@@ -43,25 +48,18 @@ module MoneyTalks
 
     alias :prod? :production?
     alias :dev? :development?
-    
-    def psp_adapter
-      @psp_adapter ||= MoneyTalks::PSPAdapter.instance
-    end
 
-    # Sets initial settings for the PSP adapter
-    def configure
-       MoneyTalks.env= MoneyTalks::EnvironmentParser.parse(ARGV)
-      begin
-        yield psp_adapter
-      rescue NoMethodError => e
-        raise FieldNotSupportedError, "Field #{e.name} is not supported by the provider #{psp_adapter.to_s}"
-      end
-    end
-    
     def env
       @env
     end
  
+    # Determines if we are in a particular environment
+    #
+    # @return [Boolean] true if current environment matches, false otherwise
+    def env?(e)
+      @env == e.to_sym
+    end
+    
     # Sets the current money_talks environment
     #
     # @param [String|Symbol] env the environment symbol
@@ -72,14 +70,8 @@ module MoneyTalks
       else e.to_sym
       end
     end
-
-    # Determines if we are in a particular environment
-    #
-    # @return [Boolean] true if current environment matches, false otherwise
-    def env?(e)
-      env == e.to_sym
-    end
-
+    
+    MoneyTalks.env= MoneyTalks::EnvironmentParser.parse(ARGV)
 
   end
 

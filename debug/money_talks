@@ -1,9 +1,4 @@
 #! /usr/bin/env ruby
-#MoneyTalks.configure do |config|
-  #config.psp = :adyen
-  #config.user= "ws@Company.Querobolsa"
-  #config.password= "mFdPkXs#N8ng*c/5g/{r8}H9i"
-#end
 
 FIXTURES_PATH = File.join(File.dirname(__FILE__), "fixtures")
 fixtures = []
@@ -35,10 +30,10 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-MoneyTalks.configure do |config|
-  config.psp = options[:psp]
-  config.user= options[:user]
-  config.password= options[:password]
+MoneyTalks::Client.configure options[:psp] do |config|
+  config.use_local_wsdl = true
+  config.user = options[:user]
+  config.password = options[:password]
 end
 
 include MoneyTalks::Payable

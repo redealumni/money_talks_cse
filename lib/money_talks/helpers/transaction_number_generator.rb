@@ -1,21 +1,26 @@
 module MoneyTalks
-  class TransactionNumberGenerator
-    class << self
+  module Helpers
+    class TransactionNumberGenerator
+      class << self
 
+        # Generates an unique hexadecimal transaction number of size n
+        # A prefix can be used to hold visible strings, such as emails, registration numbers
+        # , which can visibly help you identify this number among others. 
+        # If timestamp is true it can also be part of the number
+
+        def generate(prefix=nil, timestamp=false, size=16)
+
+          code = prefix ? "#{prefix.downcase}-" : ""
       
-      
-      def generate(prefix="", timestamp=false)
+          code += SecureRandom.hex(size/2)
 
-        code = "#{prefix.downcase}_"
-        
-        code += SecureRandom.hex(6)
+          code += "-" + Time.now.strftime("%Y%m%d%H%M%S") if timestamp == true
 
-        code += "_" + Time.now.strftime("%Y%m%d%H%M%S") if timestamp == true
+          code
 
-        code
+        end
 
       end
-
     end
   end
 end

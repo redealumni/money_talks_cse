@@ -94,6 +94,18 @@ payment.pay(on_success: p.on_send_payment_success,
 end
 
 ```
+# Adyen
+
+Pleasese note, for all modification requests Adyen will respond with a message appropriate to the modification type such
+as captureReceived, cancelReceived or refundReceived. This message is an acknowledgment of your modification
+request, it does not signify that the payment was actually modified. Once your request has been processed you will
+receive a notification informing you whether or not the modification was
+successful. note, for all modification requests Adyen will respond with a
+message appropriate to the modification type such
+as captureReceived, cancelReceived or refundReceived. This message is an acknowledgment of your modification
+request, it does not signify that the payment was actually modified. Once your request has been processed you will
+receive a notification informing you whether or not the modification was successful.
+
 
 ## Debug/Console
 

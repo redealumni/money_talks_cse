@@ -1,6 +1,6 @@
 Proc.new do |payment|
   payment.merchant_account  = "QuerobolsaCOM"
-  payment.reference = MoneyTalks::TransactionNumberGenerator.generate("test@test.com")
+  payment.reference = MoneyTalks::Helpers::TransactionNumberGenerator.generate("test@test.com")
   payment.shopper_email = "joaodasilva@fake.com"
   payment.shopper_IP = "189.102.29.193"
   payment.shopper_reference = "João da Silva"
@@ -14,7 +14,7 @@ Proc.new do |payment|
     i.value = 2
   end
   
-  payment.payment_method :card do |cc|
+  payment.card do |cc|
     cc.expiry_month = "06"
     cc.expiry_year = "2016"
     cc.holder_name = "John Doe"
