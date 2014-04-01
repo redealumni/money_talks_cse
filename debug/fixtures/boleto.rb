@@ -1,7 +1,7 @@
-Proc.new do |payment|
+MoneyTalks.build_payment :boleto do |payment|
   
   payment.merchant_account  = "QuerobolsaCOM"
-  payment.reference = MoneyTalks::Helpers::TransactionNumberGenerator.generate("test@test.com")
+  payment.reference = MoneyTalks::Helpers::TransactionNumberGenerator.generate(size: 8, prefix: "test", timestamp: true)
   payment.shopper_email = "joaodasilva@fake.com"
   payment.shopper_IP = "189.102.29.193"
 

@@ -1,12 +1,12 @@
 require 'spec_helper'
 
-describe MoneyTalks::Client do
+describe MoneyTalks do
 
   describe '.configure' do
 
     context 'with a valid adapter' do
       it 'returns the adapter' do
-        expect(MoneyTalks::Client.configure(:adyen)).to be_an_instance_of MoneyTalks::Adapter
+        expect(MoneyTalks.configure(:adyen)).to be_an_instance_of MoneyTalks::Adapter
       end
     end
 
@@ -14,7 +14,7 @@ describe MoneyTalks::Client do
       
       it "raises a PSPNotSupportedError" do
         expect {
-          MoneyTalks::Client.configure('provider_not_supported')
+          MoneyTalks.configure(:provider_not_supported)
         }.to raise_error MoneyTalks::PSPNotSupportedError
       end
 
@@ -23,12 +23,10 @@ describe MoneyTalks::Client do
       
       let(:valid_adapter) do
 
-        MoneyTalks::Client.configure :adyen do |config|
+        MoneyTalks.configure :adyen do |config|
           config.user = "user"
           config.password = "password"
         end
-
-        MoneyTalks::Client.adapter
 
       end
 
@@ -51,7 +49,7 @@ describe MoneyTalks::Client do
       context 'when a payment service provider does not support a given configuration' do
         it "raises a FieldNotSupportedError" do
           expect{
-            MoneyTalks::Client.configure :adyen do |config|
+            MoneyTalks.configure :adyen do |config|
               config.not_supported_field = "some_configuration"
             end
           }.to raise_error MoneyTalks::FieldNotSupportedError

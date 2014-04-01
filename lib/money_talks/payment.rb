@@ -1,11 +1,17 @@
 module MoneyTalks
-  module Payable
+  class Payment
+   
 
-    def authorize!
-      begin
-        adapter.authorize_payment(self)
-      rescue
-        Callbacks.included
+    def initialize(payment_method)
+      @payment_method = payment_method
+    end
+
+    def authorize
+      response = adapter.authorize_payment(self)
+      if block_given?
+        yield response
+      else
+        response
       end
     end
 

@@ -10,30 +10,31 @@ module MoneyTalks
   
   autoload :VERSION, 'money_talks/version.rb'
   autoload :EnvironmentParser, 'money_talks/environment_parser.rb'
-  autoload :Client, 'money_talks/client.rb'
+  autoload :Payment, 'money_talks/payment.rb'
+  autoload :Callbacks, 'money_talks/callbacks.rb'
+  autoload :Notifiable, 'money_talks/notifiable.rb'
+  autoload :HookMethods, 'money_talks/hook_methods.rb'
 
   autoload :Payable, 'money_talks/payable.rb'
   autoload :Serializable, 'money_talks/serializable.rb'
   autoload :Adapter, 'money_talks/adapter.rb'
-  autoload :PaymentBuilder, 'money_talks/payment_builder.rb'
-  
+
   autoload :PSPNotSupportedError, 'money_talks/errors.rb'
   autoload :FieldNotSupportedError, 'money_talks/errors.rb'
+  autoload :PaymentNotImplementedError, 'money_talks/errors.rb'
 
   module Helpers
     autoload :TransactionNumberGenerator, 'money_talks/helpers/transaction_number_generator.rb'
   end
   
-  module Adyen
+  module PSP
+    module Adyen
 
-    autoload :Adapter, 'money_talks/psps/adyen/adapter.rb'
-    autoload :Authorizable, 'money_talks/psps/adyen/operations/authorizable.rb'
-    
-    module Payments
-      autoload :Base, 'money_talks/psps/adyen/payments/base.rb'
-      autoload :Card, 'money_talks/psps/adyen/payments/card.rb'
+      autoload :Adapter, 'money_talks/psps/adyen/adapter.rb'
+      autoload :Authorizable, 'money_talks/psps/adyen/operations/authorizable.rb'
+      autoload :Payment, 'money_talks/psps/adyen/payment.rb'
+
     end
-
   end
 
   class << self
@@ -48,7 +49,7 @@ module MoneyTalks
 
     alias :prod? :production?
     alias :dev? :development?
-
+    
     def env
       @env
     end
@@ -69,6 +70,41 @@ module MoneyTalks
       when :prod then :production
       else e.to_sym
       end
+    end
+
+    def adapter
+      @adapter
+    end
+    
+    def configure(psp)
+      begin
+        adapter = load_adapter(psp)
+        yield adapter if block_given?
+      rescue NoMethodError => e
+        raise FieldNotSupportedError, "Field #{e.name} is not supported by the provider #{psp.to_s}"
+      rescue PSPNotSupportedError => e
+        raise
+      else
+        return @adapter
+      end
+    end
+
+    def load_adapter(psp)
+      begin
+        psp_const = psp.to_s.camelize 
+        adapter = Object.const_get("MoneyTalks::PSP::#{psp_const}::Adapter").new
+      rescue NameError => e
+        raise PSPNotSupportedError, "Provider #{psp_const} not available. Implement it first"
+      else
+        return @adapter = Adapter.new(adapter)
+      end
+    end
+
+    def build_payment(payment_method=nil, &block)
+      payment = Payment.new(payment_method)
+      payment.extend adapter.payment_decorator
+      payment.instance_eval &block
+      payment
     end
     
     MoneyTalks.env= MoneyTalks::EnvironmentParser.parse(ARGV)

@@ -2,9 +2,15 @@
 
 A simple common interface for payment service providers. Don't let a specific vendor hold
 you hostage. Payment gateway integration should not be
-painful. MoneyTalks lets you attach vendor-specific code to your app 
-and integrate seamlessly with ActiveRecord through a clean and simple interface.
-If your provider is still not supported feel free to contribute
+painful. MoneyTalks provides a clean and simple interface which lets you seamlessly attach vendor-specific code 
+for easy integration.
+
+## Supported PSPs
+
+If your provider is still not supported feel free to contribute. In the future psp specific implementation
+will be bundled as a separate gem. See this link to understand how to create a provider specific gem
+
+1. Adyen
 
 ## Installation
 
@@ -20,80 +26,73 @@ Or install it yourself as:
 
     $ gem install money_talks
 
-## Usage
-
-First step you should ``include
-Payable`` in your payment model. Now this model is enpowered with some simple and powerful methods. All you have to do is implement the necessary callbacks for each of them, so everything will be organized
-
 ## Rails
 
-If you are using rails, first create this file insider your initializers folder money_talks.rb
+If you are using rails, first create the money_talks.rb file inside your initializers folder
+
+## Environments
+
+MoneyTalks will smoothly detect your ENV variables in order to set its own environment. 
+In order it first checks RAILS_ENV, RACK_ENV and if none is set it will automatically set
+the default environment to development
+
 
 ```ruby
 
-MoneyTalks.configure do |config|
-  config.payment_service_provider = "gateway"
-  config.endpoint = "http://www.gateway.com"
+MoneyTalks.configure :adyen do |config|
   config.user = "my_user"
   config.pass = "my_password"
+  config.use_local_wsdl = true
 end
 
 ```
 
+## Support for Brazil
+
+Adyen's current published live url doest not support installments! You can use the option
+config.use_local_wsdl to use the correct WSDL
+
+
+Building a payment is easy:
 
 ``` ruby
 
 class Payment < ActiveRecord::Base
 
-  include Payable
 
-  # implement your callbacks
-
-  def on_pay_success
-    Proc.new do |resp|
-      self.status = "gateway_ack"
-      self.status_reason = resp.reason
-      PaymentNotification.send_mail
+def authorize
+  p = MoneyTalks.build_payment :credit_card do |payment|
+    payment.merchant_account  = "QuerobolsaCOM"
+    payment.reference = MoneyTalks::Helpers::TransactionNumberGenerator.generate(size:8)
+    payment.shopper_email = "joaodasilva@fake.com"
+    payment.shopper_IP = "189.102.29.193"
+    payment.shopper_reference = "João da Silva"
+    
+    payment.amount do |a|
+      a.currency = "BRL"
+      a.value = 430098
+    end
+    
+    payment.installments do |i|
+      i.value = 2
+    end
+    
+    payment.card do |card|
+      card.expiry_month = "06"
+      card.expiry_year = "2016"
+      card.holder_name = "John Doe"
+      card.number = "5555444433331111"
+      card.cvc = "737"
     end
   end
 
-  def on_pay_error
-    Proc.new do |resp|
-      self.status = "Error"
-      self.status_reason = resp.reason
-    end
-  end
-
-  def on_cancel_success
-  end
-
-  def on_cancel_error
-  end
-
-  def on_refund_success
-  end
-
-  def on_refund_error
-  end
-
-end
-```
-
-```ruby
-
-
-payment = Payment.new
- 
-payment.pay(on_success: p.on_send_payment_success, 
-  on_error: p.on_send_payment_error) do |data|
-
-  data.merchant_account = "MyShop"
-  data.amount = 100
-  data.reference = MoneyTalks::TransactionNumberGenerator.generate
-
 end
 
+
 ```
+
+After building a payment you gain access to your provider operations
+
 # Adyen
 
 Pleasese note, for all modification requests Adyen will respond with a message appropriate to the modification type such
@@ -111,10 +110,14 @@ receive a notification informing you whether or not the modification was success
 
 Start the console `` ./money_talks --psp [psp. i.e adyen] --user [USER] --password [PASSWORD] ``
 
-Your fixture object holds several objects that you can play along with
+The options --load-fixtures will create a global array object called fixtures with access to several working/failing
+objects
 
-## Supported PSPs
-1. Adyen
+./money_talks
+
+fixtures[0].authorize do |resp|
+
+end
 
 ## Contributing
 

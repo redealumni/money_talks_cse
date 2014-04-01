@@ -1,14 +1,14 @@
 module MoneyTalks
-  module Adyen
-    module Payments
-      class Base
+  module PSP
+    module Adyen
+      module Payment
         
       extend Savon::Model
 
       attr_accessor :merchant_account, :reference, :shopper_IP, :shopper_email, :shopper_reference, :fraud_offset,
         :select_brand, :authorization_code, :selected_brand, :shopper_statement, :selected_brand,
         :social_security_number, :delivery_date, :original_reference
-
+      
       complex_types = %w(amount installments billing_address shopper_name modification_amount card)
 
       complex_types.each do |struct_name|

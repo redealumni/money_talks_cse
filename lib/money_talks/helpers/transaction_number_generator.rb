@@ -8,13 +8,13 @@ module MoneyTalks
         # , which can visibly help you identify this number among others. 
         # If timestamp is true it can also be part of the number
 
-        def generate(prefix=nil, timestamp=false, size=16)
+        def generate(options={})
 
-          code = prefix ? "#{prefix.downcase}-" : ""
+          code = options[:prefix] ? "#{options[:prefix].downcase}-" : ""
       
-          code += SecureRandom.hex(size/2)
+          code += SecureRandom.hex(options[:size]/2)
 
-          code += "-" + Time.now.strftime("%Y%m%d%H%M%S") if timestamp == true
+          code += "-" + Time.now.strftime("%Y%m%d%H%M%S") if options[:timestamp] == true
 
           code
 

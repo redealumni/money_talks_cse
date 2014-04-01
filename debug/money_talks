@@ -1,41 +1,54 @@
 #! /usr/bin/env ruby
 
-FIXTURES_PATH = File.join(File.dirname(__FILE__), "fixtures")
-fixtures = []
-Dir.glob("#{FIXTURES_PATH}/*").each { |f| fixtures << eval(File.open(f).read) }
-
 require 'optparse'
 require 'bundler/setup'
 require 'rubygems'
 require 'money_talks'
 require 'pry'
 require 'awesome_print'
-
+require 'debugger'
 
 options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: example.rb [options]"
+  
   opts.on("-p", "--psp PSP", "Sets the payment service provider") do |psp|
     options[:psp] = psp
   end
+  
+  opts.on("-l", "--load-fixtures", "Loads test fixtures, if any (based on your adapter)") do |psp|
+    options[:load_fixtures] = true
+  end
+
   opts.on("-P", "--password PASSWORD", "Sets the password") do |pass|
     options[:password] = pass
   end
+
   opts.on("-U", "--user USER", "Sets the user") do |user|
     options[:user] = user
   end
+
   opts.on_tail("-h", "--help", "Show this message") do
     puts opts
     exit
   end
 end.parse!
 
-MoneyTalks::Client.configure options[:psp] do |config|
-  config.use_local_wsdl = true
-  config.user = options[:user]
-  config.password = options[:password]
+
+
+unless options.empty?
+  MoneyTalks::configure :adyen do |config|
+    config.use_local_wsdl = true
+    config.user = options[:user]
+    config.password = options[:password]
+  end
 end
 
-include MoneyTalks::Payable
+if options[:load_fixtures]
+  FIXTURES_PATH = File.join(File.dirname(__FILE__), "fixtures")
+  fixtures = []
+  Dir.glob("#{FIXTURES_PATH}/*").each { |f| fixtures << eval(File.open(f).read) }
+end
+
 AwesomePrint.pry!
 binding.pry

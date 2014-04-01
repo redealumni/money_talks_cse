@@ -12,30 +12,25 @@ module MoneyTalks
       @psp = psp
     end
 
-    def authorize_payment(callbacks={}, &payment_data)
-      call!(:authorize, callbacks, &payment_data)
+    def payment_decorator
+      @psp.payment_decorator
     end
 
-    def refund_payment(callbacks={}, &refund_data)
-      call!(:refund, callbacks, &refund_data)
+    def authorize_payment(payment_data)
+      @psp.authorize_payment(payment_data)
     end
 
-    def cancel_payment(callbacks={}, &cancel_data)
-      call!(:cancel, callbacks, &cancel_data)
+    def refund_payment(refund_data)
+      @psp.refund_payment(refund_data)
+    end
+
+    def cancel_payment(cancel_data)
+      @psp.cancel_payment(cancel_data)
+    end
+
+    def capture_payment(capture_data)
+      @psp.capture_payment(capture_data)
     end
     
-    private
-    
-    def call!(method, callbacks={}, &data)
-      payment_data = PaymentBuilder.build(&data)
- 
-      #begin  
-        response = @psp.send("#{method.to_s}_payment", payment_data)
-        callbacks[:on_success].call(response)
-#      rescue Exception => e
-        callbacks[:on_error].call(response)
-      #end
-    end
-
   end
 end
