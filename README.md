@@ -158,42 +158,6 @@ end
 
 ```
 
-## Notification Callbacks
-
-Another handy function, are the notification callbacks. Normally, a payment service provider processes a request
-asynchronously. The following steps illustrate a payment process:
-  
-  1. The payment is built
-  2. An operation (authorization, cancellation, capture or refund) is executed
-  3. The gateway sends an ack
-    3.1 The PSP server could be down, in this case the ack message with return an error
-    3.2 The payment message could be malformed
-    3.3 The payment successfuly receives the message
-  4. The gateway processes the information and later (asynchronoulsy) sends back the response
-  5. The client sends an ack
-
-With money_talks you can accomplish this task using a hook method called ``on_post_back`` .This method will get
-executed everytime the ``notify`` method gets called. A method gets notified with the inclusion of the Notifiable
-module
-
-``` ruby
-
-class Payment < ActiveRecord::Base
-
-  include Notifiable
-
-  on_post_back :do_something_interesting
-
-  def do_something_interesting(event)
-    # changes the state machine
-    # sends an email
-    # sends an acknowledgment to the PSP
-  end
-
-end
-
-```
-
 ## Handling Post Back Notifications
 
 When you ``include Notifiable`` in your model, you gain access to a hook method called ``on_post_back``.  You can pass
