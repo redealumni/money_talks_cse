@@ -26,16 +26,6 @@ module MoneyTalks
   module Helpers
     autoload :TransactionNumberGenerator, 'money_talks/helpers/transaction_number_generator.rb'
   end
-  
-  module PSP
-    module Adyen
-
-      autoload :Adapter, 'money_talks/psps/adyen/adapter.rb'
-      autoload :Authorizable, 'money_talks/psps/adyen/operations/authorizable.rb'
-      autoload :Payment, 'money_talks/psps/adyen/payment.rb'
-
-    end
-  end
 
   class << self
 
@@ -100,8 +90,8 @@ module MoneyTalks
       end
     end
 
-    def build_payment(payment_method=nil, &block)
-      payment = Payment.new(payment_method)
+    def build_payment(payment=nil, payment_method=nil, &block)
+      payment = payment || Payment.new(payment_method)
       payment.extend adapter.payment_decorator
       payment.instance_eval &block
       payment

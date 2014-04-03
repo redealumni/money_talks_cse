@@ -1,16 +1,7 @@
 # MoneyTalks
 
-A simple common interface for payment service providers. Don't let a specific vendor hold
-you hostage. Payment gateway integration should not be
-painful. MoneyTalks provides a clean and simple interface which lets you seamlessly attach vendor-specific code 
-for easy integration.
-
-## Supported PSPs
-
-If your provider is still not supported feel free to contribute. In the future psp specific implementation
-will be bundled as a separate gem. See this link to understand how to create a provider specific gem
-
-1. Adyen
+An easy interface for integration with common payment service providers. MoneyTalks abstracts many operations common
+when working with PSPs, in a simple and easy interface.  Don't let a specific PSP hold you hostage anymore!!!
 
 ## Installation
 
@@ -18,27 +9,36 @@ Add this line to your application's Gemfile:
 
     gem 'money_talks'
 
-And then execute:
-
-    $ bundle install
-
 Or install it yourself as:
 
     $ gem install money_talks
 
-## Rails
+And finally execute:
 
-If you are using rails, first create the money_talks.rb file inside your initializers folder
+    $ bundle install
 
-## Environments
+__Important:__ You are only installing the adapter interface. We separated interface and vendor specific code as
+different gems to provide a cleaner and lightweight code.
 
-MoneyTalks will smoothly detect your ENV variables in order to set its own environment. 
-In order it first checks RAILS_ENV, RACK_ENV and if none is set it will automatically set
-the default environment to development
+## Using a PSP
 
+In order to do something useful with MoneyTalks, you need to attach a specific adapter, so MoneyTalks knows how to talk 
+to your payment service provider. In this case all you need to do, is to include another gem, usually the format ``gem
+'money_talks_[psp]'`` where __[psp]__  is the name of your payment service provider. Check the documentation here
+in order to understand how you can implement you own providers.
+Each payment service provider is bundled as a separate gem. 
 
-```ruby
+## Supported PSPs
 
+Currently, the following PSPs are supported:
+
+1. Adyen | To use it add this line to your Gemfile `` gem 'money_talks_adyen' ``
+
+If your provider is still not supported feel free to contribute.
+
+## Getting Started
+
+``` ruby
 MoneyTalks.configure :adyen do |config|
   config.user = "my_user"
   config.pass = "my_password"
@@ -47,21 +47,22 @@ end
 
 ```
 
-## Support for Brazil
+The ``use_local_wsdl`` parameter uses a local wsdl document, instead of a live version. This can be useful in some
+cases.
+In __Rails__, place this code inside a money_talks.rb file in your __initializers__ folder
 
-Adyen's current published live url doest not support installments! You can use the option
-config.use_local_wsdl to use the correct WSDL
+### Environments
 
+MoneyTalks will smoothly detect your ENV variables in order to set its own environment. 
+In order of priority, it first checks RAILS_ENV, RACK_ENV and finally MONEY_TALKS_ENV
 
-Building a payment is easy:
+### Using MoneyTalks
+Building a payment is very easy:
 
 ``` ruby
 
-class Payment < ActiveRecord::Base
-
-
-def authorize
-  p = MoneyTalks.build_payment :credit_card do |payment|
+payment = MoneyTalks.build_payment :credit_card do |payment|
+    
     payment.merchant_account  = "QuerobolsaCOM"
     payment.reference = MoneyTalks::Helpers::TransactionNumberGenerator.generate(size:8)
     payment.shopper_email = "joaodasilva@fake.com"
@@ -77,34 +78,165 @@ def authorize
       i.value = 2
     end
     
-    payment.card do |card|
-      card.expiry_month = "06"
-      card.expiry_year = "2016"
-      card.holder_name = "John Doe"
-      card.number = "5555444433331111"
-      card.cvc = "737"
+    payment.card do |cc|
+      cc.expiry_month = "06"
+      cc.expiry_year = "2016"
+      cc.holder_name = "João da Silva"
+      cc.number = "5555444433331111"
+      cc.cvc = "737"
+    end
+
+  end
+
+payment.authorize do |response|
+  puts response
+end
+
+```
+
+Typically, in a real world scenario, you will likely provide several payment methods. To avoid code duplication,
+use can use the benefits of inheritance and put all your boilerplate code in a superclass.
+
+``` ruby
+
+class Payment < ActiveRecord::Base
+
+  def self.build
+    MoneyTalks.build_payment do |payment|
+      payment.merchant_account = "QueroBolsaCOM"
+      payment.reference = MoneyTalks::Helpers::TransactionNumberGenerator.generate(size:8)
+    end
+  end
+
+  def payment_handler
+    self.class.build
+  end
+
+end
+
+class CreditCard < Payment
+
+  def self.build
+    MoneyTalks.build_payment(super, :credit_card) do |payment|
+      payment.card do |cc|
+        cc.expiry_month = "06"
+        cc.expiry_year = "2016"
+        cc.holder_name = "John Doe"
+        cc.number = "5555444433331111"
+        cc.cvc = "737"
+      end
+    end
+  end
+
+  def authorize
+    payment_handler.authorize do |response|
+      # do something
+      # change the state machine
+      # send an email to the customer about the payment status
+    end
+  end
+
+  def cancel
+    payment_handler.cancel do |response|
+      # do something
+    end
+  end
+
+  def capture
+    payment_handler.capture do |response|
+      # do something
+    end
+  end
+
+  def refund
+    payment_handler.refund do |response|
+      # do something
     end
   end
 
 end
 
+```
+
+## Notification Callbacks
+
+Another handy function, are the notification callbacks. Normally, a payment service provider processes a request
+asynchronously. The following steps illustrate a payment process:
+  
+  1. The payment is built
+  2. An operation (authorization, cancellation, capture or refund) is executed
+  3. The gateway sends an ack
+    3.1 The PSP server could be down, in this case the ack message with return an error
+    3.2 The payment message could be malformed
+    3.3 The payment successfuly receives the message
+  4. The gateway processes the information and later (asynchronoulsy) sends back the response
+  5. The client sends an ack
+
+With money_talks you can accomplish this task using a hook method called ``on_post_back`` .This method will get
+executed everytime the ``notify`` method gets called. A method gets notified with the inclusion of the Notifiable
+module
+
+``` ruby
+
+class Payment < ActiveRecord::Base
+
+  include Notifiable
+
+  on_post_back :do_something_interesting
+
+  def do_something_interesting(event)
+    # changes the state machine
+    # sends an email
+    # sends an acknowledgment to the PSP
+  end
+
+end
 
 ```
 
-After building a payment you gain access to your provider operations
+## Handling Post Back Notifications
 
-# Adyen
+When you ``include Notifiable`` in your model, you gain access to a hook method called ``on_post_back``.  You can pass
+either a method or a block to on_post_back which is executed whenever the ``notify`` method is called.
+Usually PSPs processes your request asynchronously. After processing you request, a message is posted back to your
+web site. Basically, with MoneyTalks, the following steps are taken:
 
-Pleasese note, for all modification requests Adyen will respond with a message appropriate to the modification type such
-as captureReceived, cancelReceived or refundReceived. This message is an acknowledgment of your modification
-request, it does not signify that the payment was actually modified. Once your request has been processed you will
-receive a notification informing you whether or not the modification was
-successful. note, for all modification requests Adyen will respond with a
-message appropriate to the modification type such
-as captureReceived, cancelReceived or refundReceived. This message is an acknowledgment of your modification
-request, it does not signify that the payment was actually modified. Once your request has been processed you will
-receive a notification informing you whether or not the modification was successful.
+  1. An operation over a payment is executed (i.e authorize, cancel, refund or capture)
+  2. The PSP responds with a success or fail message(basically meaning that it has either received or not your message)
+  3. The PSP enqueue your request, processes it and answers with a post back message (usually you setup the route
+  in the PSP admin interface)
+  4. The post request is received by your website and the ``notify`` method is called, passing the post message as a
+     parameter
+  5. The ``on_post_back`` callback is executed
 
+Example using Rails
+
+``` ruby
+
+class PaymentNotificationsController < ApplicationController
+
+  def create
+    payment = Payment.find(params[:id])
+    payment.notify(params[:post_payload])
+  end
+
+end
+
+class Payment < ActiveRecord::Base
+
+  include Notifiable
+  
+  on_post_back :do_something
+
+  def do_something(post_payload)
+    puts "Got a response from the gateway: #{post_payload}"
+  end
+
+end
+
+```
+
+For Rails, check a complete in __examples/rails__
 
 ## Debug/Console
 
