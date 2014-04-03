@@ -32,7 +32,9 @@ Each payment service provider is bundled as a separate gem.
 
 Currently, the following PSPs are supported:
 
-1. Adyen | To use it add this line to your Gemfile `` gem 'money_talks_adyen' ``
+1. [Adyen](https://github.com/redealumni/money_talks_adyen) 
+
+To use it add this line to your Gemfile `` gem 'money_talks_adyen' ``
 
 If your provider is still not supported feel free to contribute.
 
