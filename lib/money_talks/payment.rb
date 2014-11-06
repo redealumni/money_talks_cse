@@ -1,11 +1,6 @@
 module MoneyTalks
   class Payment
    
-
-    def initialize(payment_method)
-      @payment_method = payment_method
-    end
-
     def authorize
       response = adapter.authorize_payment(self)
       if block_given?

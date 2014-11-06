@@ -2,7 +2,6 @@
 money_talks_path = File.dirname(__FILE__)
 $LOAD_PATH.unshift(money_talks_path) unless $LOAD_PATH.include?(money_talks_path)
 
-require 'savon'
 require 'singleton'
 require 'active_support/core_ext'
 
@@ -15,7 +14,6 @@ module MoneyTalks
   autoload :Notifiable, 'money_talks/notifiable.rb'
   autoload :HookMethods, 'money_talks/hook_methods.rb'
 
-  autoload :Payable, 'money_talks/payable.rb'
   autoload :Serializable, 'money_talks/serializable.rb'
   autoload :Adapter, 'money_talks/adapter.rb'
 
@@ -90,10 +88,10 @@ module MoneyTalks
       end
     end
 
-    def build_payment(payment=nil, payment_method=nil, &block)
-      payment = payment || Payment.new(payment_method)
+    def build_payment(binding_object=nil, payment=nil, &block)
+      payment = payment || Payment.new
       payment.extend adapter.payment_decorator
-      payment.instance_eval &block
+      payment.instance_exec payment, binding_object, &block
       payment
     end
     

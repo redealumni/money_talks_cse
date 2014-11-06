@@ -1,4 +1,4 @@
-MoneyTalks.build_payment :boleto do |payment|
+MoneyTalks.build_payment do |payment|
   
   payment.merchant_account  = "QuerobolsaCOM"
   payment.reference = MoneyTalks::Helpers::TransactionNumberGenerator.generate(size: 8, prefix: "test", timestamp: true)

@@ -50,7 +50,6 @@ class Payment < ActiveRecord::Base
 
 end
 
-
 class CreditCard < Payment
 
   def self.build

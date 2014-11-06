@@ -9,15 +9,10 @@ module MoneyTalks
         # If timestamp is true it can also be part of the number
 
         def generate(options={})
-
           code = options[:prefix] ? "#{options[:prefix].downcase}-" : ""
-      
           code += SecureRandom.hex(options[:size]/2)
-
           code += "-" + Time.now.strftime("%Y%m%d%H%M%S") if options[:timestamp] == true
-
           code
-
         end
 
       end
