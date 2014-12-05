@@ -4,7 +4,7 @@ module MoneyTalks
     attr_reader :psp
     
     class_eval do
-      attr = [:user, :password, :use_local_wsdl]
+      attr = [:user, :password, :use_local_wsdl, :log_output]
       delegate *attr.map { |a| [a, "#{a}=".to_sym]}.flatten, to: :psp
     end
 
