@@ -14,8 +14,13 @@ module MoneyTalks
       adapter.cancel_payment(callbacks, &data)
     end
 
-    def refund(callbacks={}, &data)
-      adapter.refund_payment(callbacks, &data)
+    def refund
+      response = adapter.refund_payment(self)
+      if block_given?
+        yield response
+      else
+        response
+      end
     end
 
     def capture(callbacks={}, &data)
