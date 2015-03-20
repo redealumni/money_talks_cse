@@ -23,6 +23,15 @@ module MoneyTalks
       end
     end
 
+    def cancel_or_refund
+      response = adapter.cancel_or_refund_payment(self)
+      if block_given?
+        yield response
+      else
+        response
+      end
+    end
+
     def capture(callbacks={}, &data)
       adapter.capture_payment(callbacks, &data)
     end

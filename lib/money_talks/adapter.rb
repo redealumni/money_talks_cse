@@ -28,6 +28,10 @@ module MoneyTalks
       @psp.cancel_payment(cancel_data)
     end
 
+    def cancel_or_refund_payment(refund_data)
+      @psp.cancel_or_refund_payment(refund_data)
+    end
+
     def capture_payment(capture_data)
       @psp.capture_payment(capture_data)
     end
