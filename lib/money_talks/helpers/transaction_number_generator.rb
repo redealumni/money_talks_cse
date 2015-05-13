@@ -4,8 +4,8 @@ module MoneyTalks
       class << self
 
         # Generates an unique hexadecimal transaction number of size n
-        # A prefix can be used to hold visible strings, such as emails, registration numbers
-        # , which can visibly help you identify this number among others. 
+        # A prefix can be used to hold visible strings, such as emails, registration numbers,
+        # which can visibly help you identify this number among others.
         # If timestamp is true it can also be part of the number
 
         def generate(options={})

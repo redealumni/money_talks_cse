@@ -6,19 +6,19 @@ require 'singleton'
 require 'active_support/core_ext'
 
 module MoneyTalks
-  
-  autoload :VERSION, 'money_talks/version.rb'
-  autoload :EnvironmentParser, 'money_talks/environment_parser.rb'
-  autoload :Payment, 'money_talks/payment.rb'
-  autoload :Callbacks, 'money_talks/callbacks.rb'
-  autoload :Notifiable, 'money_talks/notifiable.rb'
-  autoload :HookMethods, 'money_talks/hook_methods.rb'
 
-  autoload :Serializable, 'money_talks/serializable.rb'
-  autoload :Adapter, 'money_talks/adapter.rb'
+  autoload :VERSION,                    'money_talks/version.rb'
+  autoload :EnvironmentParser,          'money_talks/environment_parser.rb'
+  autoload :Payment,                    'money_talks/payment.rb'
+  autoload :Callbacks,                  'money_talks/callbacks.rb'
+  autoload :Notifiable,                 'money_talks/notifiable.rb'
+  autoload :ClassMethods,               'money_talks/class_methods.rb'
 
-  autoload :PSPNotSupportedError, 'money_talks/errors.rb'
-  autoload :FieldNotSupportedError, 'money_talks/errors.rb'
+  autoload :Serializable,               'money_talks/serializable.rb'
+  autoload :Adapter,                    'money_talks/adapter.rb'
+
+  autoload :PSPNotSupportedError,       'money_talks/errors.rb'
+  autoload :FieldNotSupportedError,     'money_talks/errors.rb'
   autoload :PaymentNotImplementedError, 'money_talks/errors.rb'
 
   module Helpers
@@ -37,18 +37,18 @@ module MoneyTalks
 
     alias :prod? :production?
     alias :dev? :development?
-    
+
     def env
       @env
     end
- 
+
     # Determines if we are in a particular environment
     #
     # @return [Boolean] true if current environment matches, false otherwise
     def env?(e)
       @env == e.to_sym
     end
-    
+
     # Sets the current money_talks environment
     #
     # @param [String|Symbol] env the environment symbol
@@ -60,41 +60,23 @@ module MoneyTalks
       end
     end
 
-    def adapter
-      @adapter
-    end
-    
-    def configure(psp)
-      begin
-        adapter = load_adapter(psp)
-        yield adapter if block_given?
-      rescue NoMethodError => e
-        raise FieldNotSupportedError, "Field #{e.name} is not supported by the provider #{psp.to_s}"
-      rescue PSPNotSupportedError => e
-        raise
-      else
-        return @adapter
-      end
+    def soap_client
+      @soap_client
     end
 
-    def load_adapter(psp)
-      begin
-        psp_const = psp.to_s.camelize 
-        adapter = Object.const_get("MoneyTalks::PSP::#{psp_const}::Adapter").new
-      rescue NameError => e
-        raise PSPNotSupportedError, "Provider #{psp_const} not available. Implement it first"
-      else
-        return @adapter = Adapter.new(adapter)
-      end
+    def configure(&b)
+      @soap_client = MoneyTalks::AdyenClient.new
+      @soap_client.instance_eval(b)
+      rescue NoMethodError => e
+        raise FieldNotSupportedError, "Field #{e.name} is not supported"
     end
 
     def build_payment(binding_object=nil, payment=nil, &block)
       payment = payment || Payment.new
-      payment.extend adapter.payment_decorator
       payment.instance_exec payment, binding_object, &block
       payment
     end
-    
+
     MoneyTalks.env= MoneyTalks::EnvironmentParser.parse(ARGV)
 
   end

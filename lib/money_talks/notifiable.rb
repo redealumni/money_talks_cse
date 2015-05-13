@@ -1,8 +1,8 @@
 module MoneyTalks
   module Notifiable
-    
+
     def self.included(klass)
-      klass.extend(HookMethods)
+      klass.extend(ClassMethods)
     end
 
     def notify(event)
@@ -13,6 +13,6 @@ module MoneyTalks
         exec_obj.call(event)
       end
     end
-    
+
   end
 end

@@ -1,6 +1,6 @@
 module MoneyTalks
-  module HookMethods
-    
+  module ClassMethods
+
     def on_post_back(method=nil, &callback)
       @@hook = method || callback
     end
