@@ -12,8 +12,9 @@ module MoneyTalks
         basic_auth: [user, password],
         wsdl: wsdl,
         convert_request_keys_to: :lower_camelcase,
-        pretty_print_xml: MoneyTalks::dev?,
-        log: log_output
+        pretty_print_xml: true,
+        #pretty_print_xml: MoneyTalks::dev?,
+        log: true
         )
     end
 

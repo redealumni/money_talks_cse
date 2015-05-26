@@ -3,7 +3,9 @@ money_talks_path = File.dirname(__FILE__)
 $LOAD_PATH.unshift(money_talks_path) unless $LOAD_PATH.include?(money_talks_path)
 
 require 'singleton'
+require 'active_support'
 require 'active_support/core_ext'
+require 'savon'
 
 module MoneyTalks
 
@@ -15,7 +17,11 @@ module MoneyTalks
   autoload :ClassMethods,               'money_talks/class_methods.rb'
 
   autoload :Serializable,               'money_talks/serializable.rb'
-  autoload :Adapter,                    'money_talks/adapter.rb'
+  autoload :AdyenClient,                'money_talks/adyen_client.rb'
+
+  module ComplexTypes
+    autoload :AdditionalData,           'money_talks/complex_types/additional_data.rb'
+  end
 
   autoload :PSPNotSupportedError,       'money_talks/errors.rb'
   autoload :FieldNotSupportedError,     'money_talks/errors.rb'
@@ -60,13 +66,13 @@ module MoneyTalks
       end
     end
 
-    def soap_client
+    def client
       @soap_client
     end
 
     def configure(&b)
       @soap_client = MoneyTalks::AdyenClient.new
-      @soap_client.instance_eval(b)
+      @soap_client.instance_eval &b
       rescue NoMethodError => e
         raise FieldNotSupportedError, "Field #{e.name} is not supported"
     end
@@ -79,6 +85,6 @@ module MoneyTalks
 
     MoneyTalks.env= MoneyTalks::EnvironmentParser.parse(ARGV)
 
-  end
+end
 
 end
