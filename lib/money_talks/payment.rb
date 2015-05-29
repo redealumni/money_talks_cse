@@ -37,19 +37,45 @@ module MoneyTalks
       end
     end
 
-    [:authorise, :refund, :cancel_or_refund].each do |method|
-      define_method method do
-        begin
-          response = client.connection_handler.call(method, message: self.serialize_as(OPERATIONS[method]))
-          if block_given?
-            yield response
-          else
-            response
-          end
-        rescue Savon::SOAPFault => error
-          puts error.message
-          #raise MoneyTalks::Error.new(error.message.match(/[0-9]{3}/).to_s)
+    def authorise
+      begin
+        response = client.connection_handler.call(:authorise, message: self.serialize_as(:payment_request))
+        if block_given?
+          yield response
+        else
+          response
         end
+      rescue Savon::SOAPFault => error
+        puts error.message
+        #raise MoneyTalks::Error.new(error.message.match(/[0-9]{3}/).to_s)
+      end
+    end
+
+    def refund
+      begin
+        response = client.connection_handler.call(:refund, message: self.serialize_as(:modification_request))
+        if block_given?
+          yield response
+        else
+          response
+        end
+      rescue Savon::SOAPFault => error
+        puts error.message
+        #raise MoneyTalks::Error.new(error.message.match(/[0-9]{3}/).to_s)
+      end
+    end
+
+    def cancel_or_refund
+      begin
+        response = client.connection_handler.call(:cancel_or_refund, message: self.serialize_as(:modification_request))
+        if block_given?
+          yield response
+        else
+          response
+        end
+      rescue Savon::SOAPFault => error
+        puts error.message
+        #raise MoneyTalks::Error.new(error.message.match(/[0-9]{3}/).to_s)
       end
     end
 
