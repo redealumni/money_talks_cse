@@ -3,6 +3,7 @@
   <head>
     <title>Example Payment Form</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="adyen.cardtype.css">
   </head>
   <body>
     <form method="POST" action="/create" id="adyen-encrypted-form">
@@ -15,6 +16,8 @@
             </label>
             <span id="cardType"></span>
           </div>
+
+
 
           <div class="field">
             <label for="adyen-encrypted-form-cvc">
@@ -47,6 +50,7 @@
     <!-- How to use the Adyen encryption client-side JS library -->
     <!-- N.B. Make sure the library is *NOT* loaded in the "head" of the HTML document -->
     <script src="adyen.encrypt.min.js"></script>
+    <script src="adyen.cardtype.min.js"></script>
     <script>
       // generate time client side for testing only... Don't deploy on a real integration!!!
       document.getElementById('adyen-encrypted-form-expiry-generationtime').value = new Date().toISOString();
@@ -94,7 +98,10 @@
       options.cardTypeElement = document.getElementById('cardType');
 
       // the form will be encrypted before it is submitted
-      adyen.encrypt.createEncryptedForm( form, key, options);
+      var ccForm = adyen.encrypt.createEncryptedForm( form, key, options);
+
+      ccForm.addCardTypeDetection(document.getElementById('cardType'));
+
     </script>
   </body>
 </html>

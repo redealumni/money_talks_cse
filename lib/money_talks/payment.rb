@@ -17,7 +17,7 @@ module MoneyTalks
     COMPLEX_TYPES      = %w(additional_data)
     SIMPLE_TYPES       = %w(amount installments billing_address shopper_name modification_amount card)
 
-    ['additional_data'].each do |complex_type|
+    COMPLEX_TYPES.each do |complex_type|
       define_method complex_type do |&block|
         var = instance_variable_get("@#{complex_type}")
         if var.nil?
@@ -37,45 +37,15 @@ module MoneyTalks
       end
     end
 
-    def authorise
-      begin
-        response = client.connection_handler.call(:authorise, message: self.serialize_as(:payment_request))
-        if block_given?
-          yield response
-        else
-          response
+    OPERATIONS.each do |method, serialization|
+      define_method method.to_s do
+        begin
+          response = client.connection_handler.call(method, message: self.serialize_as(serialization))
+          yield response if block_given?
+        rescue Savon::SOAPFault => error
+          fault_code = error.to_hash[:fault][:detail][:error_code]
+          raise MoneyTalks::AdyenError.new(fault_code, error.message)
         end
-      rescue Savon::SOAPFault => error
-        puts error.message
-        #raise MoneyTalks::Error.new(error.message.match(/[0-9]{3}/).to_s)
-      end
-    end
-
-    def refund
-      begin
-        response = client.connection_handler.call(:refund, message: self.serialize_as(:modification_request))
-        if block_given?
-          yield response
-        else
-          response
-        end
-      rescue Savon::SOAPFault => error
-        puts error.message
-        #raise MoneyTalks::Error.new(error.message.match(/[0-9]{3}/).to_s)
-      end
-    end
-
-    def cancel_or_refund
-      begin
-        response = client.connection_handler.call(:cancel_or_refund, message: self.serialize_as(:modification_request))
-        if block_given?
-          yield response
-        else
-          response
-        end
-      rescue Savon::SOAPFault => error
-        puts error.message
-        #raise MoneyTalks::Error.new(error.message.match(/[0-9]{3}/).to_s)
       end
     end
 

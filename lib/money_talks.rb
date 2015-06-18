@@ -23,9 +23,9 @@ module MoneyTalks
     autoload :AdditionalData,           'money_talks/complex_types/additional_data.rb'
   end
 
-  autoload :PSPNotSupportedError,       'money_talks/errors.rb'
   autoload :FieldNotSupportedError,     'money_talks/errors.rb'
   autoload :PaymentNotImplementedError, 'money_talks/errors.rb'
+  autoload :AdyenError,                 'money_talks/errors.rb'
 
   module Helpers
     autoload :TransactionNumberGenerator, 'money_talks/helpers/transaction_number_generator.rb'
@@ -60,21 +60,38 @@ module MoneyTalks
     # @param [String|Symbol] env the environment symbol
     def env=(e)
       @env = case(e.to_sym)
-      when :dev  then :development
-      when :prod then :production
-      else e.to_sym
+        when :dev  then :development
+        when :prod then :production
+        else e.to_sym
       end
+    end
+
+    def load_translation_file
+      files = Dir.glob(File.join(File.dirname(__FILE__), "money_talks", "translations", "*.yml"))
+      @translation = YAML::load_file(files.select { |f| File.basename(f).include?(MoneyTalks.language.to_s) }.first).with_indifferent_access || 'en'
+      binding.pry
+    end
+
+    def translation
+      @translation
+    end
+
+    def configure(&b)
+      begin
+        @soap_client = MoneyTalks::AdyenClient.new
+        @soap_client.instance_eval &b
+      rescue NoMethodError => e
+        raise FieldNotSupportedError, "Field #{e.name} is not supported"
+      end
+      MoneyTalks.load_translation_file
     end
 
     def client
       @soap_client
     end
 
-    def configure(&b)
-      @soap_client = MoneyTalks::AdyenClient.new
-      @soap_client.instance_eval &b
-      rescue NoMethodError => e
-        raise FieldNotSupportedError, "Field #{e.name} is not supported"
+    def language
+      @soap_client.lang
     end
 
     def build_payment(binding_object=nil, payment=nil, &block)
