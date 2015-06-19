@@ -69,7 +69,6 @@ module MoneyTalks
     def load_translation_file
       files = Dir.glob(File.join(File.dirname(__FILE__), "money_talks", "translations", "*.yml"))
       @translation = YAML::load_file(files.select { |f| File.basename(f).include?(MoneyTalks.language.to_s) }.first).with_indifferent_access || 'en'
-      binding.pry
     end
 
     def translation
