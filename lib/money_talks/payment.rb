@@ -38,10 +38,14 @@ module MoneyTalks
     end
 
     OPERATIONS.each do |method, serialization|
-      define_method method.to_s do
+      define_method method.to_s do |*args, &blk|
         begin
           response = client.connection_handler.call(method, message: self.serialize_as(serialization))
-          yield response if block_given?
+          if blk
+            blk.call(response)
+          else
+            blk
+          end
         rescue Savon::SOAPFault => error
           fault_code = error.to_hash[:fault][:detail][:error_code]
           raise MoneyTalks::AdyenError.new(fault_code, error.message)
